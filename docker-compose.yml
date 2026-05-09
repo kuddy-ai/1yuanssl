@@ -17,9 +17,9 @@ services:
       - DATABASE_URL=sqlite+aiosqlite:///./data/1yuanssl.db
       - ENCRYPTION_KEY=${ENCRYPTION_KEY:-change-me-in-production-use-strong-random-key}
       - ACME_MODE=mock
-      - CORS_ORIGINS=http://localhost:7001,http://localhost:3000,http://localhost
+      - CORS_ORIGINS=["http://localhost:7001","http://localhost:3000","http://localhost"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7000/api/v1/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:7000/api/v1/health').read()"]
       interval: 30s
       timeout: 10s
       retries: 3
