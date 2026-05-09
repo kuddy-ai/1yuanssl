@@ -21,6 +21,7 @@ from app.schemas.certificate_file import CertificateDownloadResponse
 from app.schemas.common import SuccessResponse, ErrorResponse
 from app.services.certificate_service import CertificateService
 from app.services.challenge_service import ChallengeService
+from app.services.renewal_service import RenewalService
 
 router = APIRouter()
 
@@ -257,3 +258,23 @@ async def get_certificate_stats(
     stats = await service.get_stats()
 
     return SuccessResponse(data=stats)
+
+
+@router.post(
+    "/renewals/run",
+    response_model=SuccessResponse[dict],
+    summary="手动触发续期检查"
+)
+async def run_renewal_check(
+    threshold_days: int = Query(default=30, ge=1, le=90),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    手动触发 Mock 自动续期检查。
+
+    扫描已签发、开启自动续期、且即将在 threshold_days 天内过期的订单。
+    """
+    service = RenewalService(db)
+    result = await service.renew_expiring_certificates(threshold_days=threshold_days)
+
+    return SuccessResponse(data=result, message="Renewal check completed")
