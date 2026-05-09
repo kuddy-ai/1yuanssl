@@ -39,7 +39,8 @@ services:
       - ./frontend/src:/app/src:ro  # 代码热重载
       - ./frontend/public:/app/public:ro
     environment:
-      - VITE_API_BASE_URL=http://localhost:7000/api/v1
+      - VITE_API_BASE_URL=/api/v1
+      - VITE_DEV_PROXY_TARGET=http://backend:7000
       - VITE_APP_TITLE=1yuanssl
     depends_on:
       backend:
