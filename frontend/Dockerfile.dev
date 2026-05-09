@@ -1,0 +1,21 @@
+# Frontend Dockerfile - 开发环境（支持热重载）
+FROM node:20-alpine
+
+WORKDIR /app
+
+# 复制依赖配置
+COPY package.json ./
+
+# 安装 pnpm
+RUN npm install -g pnpm
+
+# 安装依赖
+RUN pnpm install
+
+# 复制源代码（开发环境会通过 volume 挂载覆盖）
+COPY . .
+
+EXPOSE 7001
+
+# 开发模式启动（端口 7001）
+CMD ["pnpm", "dev", "--", "--host", "0.0.0.0", "--port", "7001"]

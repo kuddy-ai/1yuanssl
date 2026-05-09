@@ -1,0 +1,31 @@
+# Backend Dockerfile - 开发环境（支持热重载）
+FROM python:3.11-slim
+
+# 安装 uv（快速 Python 包管理器）
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+WORKDIR /app
+
+# 复制依赖配置
+COPY pyproject.toml .
+COPY README.md .
+
+# 使用 uv 安装依赖（包括开发依赖）
+RUN uv pip install --system --no-cache --index-url https://pypi.tuna.tsinghua.edu.cn/simple -e ".[dev]"
+
+# 复制应用代码（开发环境会通过 volume 挂载覆盖）
+COPY app ./app
+
+# 创建数据目录
+RUN mkdir -p /app/data
+
+# 环境变量（开发环境）
+ENV PYTHONUNBUFFERED=1
+ENV APP_ENV=development
+ENV DEBUG=true
+ENV DATABASE_URL=sqlite+aiosqlite:///./data/1yuanssl.db
+
+EXPOSE 7000
+
+# 开发模式启动（支持热重载，端口 7000）
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "7000", "--reload"]
