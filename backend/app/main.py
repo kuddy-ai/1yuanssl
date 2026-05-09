@@ -13,6 +13,7 @@ from app.api.v1.router import api_router
 from app.api.v1.challenges import http01_router
 from app.db import init_db
 from app.core.logging import setup_logging
+from app.core.middleware import LoginRateLimitMiddleware, SecurityHeadersMiddleware
 
 
 @asynccontextmanager
@@ -72,6 +73,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 安全响应头和基础限流
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(LoginRateLimitMiddleware)
 
 # 注册 API v1 路由
 app.include_router(api_router, prefix=settings.API_V1_STR)
