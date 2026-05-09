@@ -92,6 +92,10 @@ class Settings(BaseSettings):
         description="证书续期检查间隔（小时）"
     )
 
+    # 基础限流配置
+    LOGIN_RATE_LIMIT_REQUESTS: int = Field(default=5, description="登录窗口内最大尝试次数")
+    LOGIN_RATE_LIMIT_WINDOW_SECONDS: int = Field(default=60, description="登录限流窗口秒数")
+
     @property
     def is_production(self) -> bool:
         """是否为生产环境"""
