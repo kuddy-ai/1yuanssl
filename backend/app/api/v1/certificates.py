@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import PlainTextResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.audit import audit_event
 from app.db import get_db
 from app.models.certificate_order import OrderStatus
 from app.schemas.certificate_order import (
@@ -46,6 +47,13 @@ async def create_certificate_order(
     """
     service = CertificateService(db)
     order = await service.create_order(order_data)
+    audit_event(
+        "certificate_order_created",
+        actor="admin",
+        order_id=order.id,
+        domains=order.domains,
+        challenge_type=order.challenge_type.value,
+    )
 
     return SuccessResponse(
         data=CertificateOrderResponse.model_validate(order),
@@ -131,6 +139,7 @@ async def validate_certificate_order(
     """
     service = CertificateService(db)
     order = await service.validate_order(order_id)
+    audit_event("certificate_order_validated", actor="admin", order_id=order.id)
 
     return SuccessResponse(
         data=CertificateOrderResponse.model_validate(order),
@@ -155,6 +164,7 @@ async def issue_certificate(
     """
     service = CertificateService(db)
     order = await service.issue_certificate(order_id)
+    audit_event("certificate_issued", actor="admin", order_id=order.id)
 
     return SuccessResponse(
         data=CertificateOrderResponse.model_validate(order),
@@ -187,6 +197,12 @@ async def download_certificate_file(
     """
     service = CertificateService(db)
     pem_content = await service.download_certificate(order_id, file_type)
+    audit_event(
+        "certificate_file_downloaded",
+        actor="admin",
+        order_id=order_id,
+        file_type=file_type,
+    )
 
     # 设置文件名
     filename = f"cert-{order_id}-{file_type}.pem"
@@ -212,6 +228,7 @@ async def delete_certificate_order(
     """删除证书订单及其关联数据"""
     service = CertificateService(db)
     await service.delete_order(order_id)
+    audit_event("certificate_order_deleted", actor="admin", order_id=order_id)
 
     return SuccessResponse(
         data=None,
