@@ -7,6 +7,7 @@ HTTP-01 ACME 验证路由
 """
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import PlainTextResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import get_db
@@ -18,7 +19,7 @@ http01_router = APIRouter()
 
 @http01_router.get(
     "/.well-known/acme-challenge/{token}",
-    response_class=str,
+    response_class=PlainTextResponse,
     summary="HTTP-01 ACME 验证"
 )
 async def http01_challenge_response(

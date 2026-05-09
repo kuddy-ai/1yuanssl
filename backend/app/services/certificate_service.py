@@ -5,17 +5,17 @@
 """
 
 from datetime import datetime, timedelta
-from typing import List, Optional
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 
-from app.models.certificate_order import CertificateOrder, OrderStatus
-from app.models.certificate_file import CertificateFile
-from app.models.acme_challenge import AcmeChallenge
-from app.acme import get_acme_client, MockACMEClient
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.acme import get_acme_client
 from app.acme.crypto import generate_dummy_certificate, generate_privkey_pem
+from app.core.exceptions import CertificateException, NotFoundException
 from app.core.security import encrypt_data
-from app.core.exceptions import NotFoundException, CertificateException
+from app.models.acme_challenge import AcmeChallenge
+from app.models.certificate_file import CertificateFile
+from app.models.certificate_order import CertificateOrder, OrderStatus
 from app.schemas.certificate_order import CertificateOrderCreate
 
 
@@ -54,6 +54,11 @@ class CertificateService:
 
         # 生成 challenges
         challenges = await self.acme_client.get_challenges(acme_order["url"])
+        challenges = [
+            challenge
+            for challenge in challenges
+            if challenge["type"] == order_data.challenge_type
+        ]
         for challenge_data in challenges:
             challenge = AcmeChallenge(
                 order_id=order.id,
@@ -85,10 +90,10 @@ class CertificateService:
 
     async def list_orders(
         self,
-        status: Optional[OrderStatus] = None,
+        status: OrderStatus | None = None,
         limit: int = 50,
         offset: int = 0
-    ) -> List[CertificateOrder]:
+    ) -> list[CertificateOrder]:
         """获取订单列表"""
         query = select(CertificateOrder)
 
@@ -111,7 +116,7 @@ class CertificateService:
 
         if order.status != OrderStatus.PENDING:
             raise CertificateException(
-                f"Order status must be 'pending' to validate",
+                "Order status must be 'pending' to validate",
                 detail=f"Current status: {order.status}"
             )
 
@@ -141,7 +146,7 @@ class CertificateService:
 
         if order.status not in [OrderStatus.VALIDATING, OrderStatus.PENDING]:
             raise CertificateException(
-                f"Order must be validated before issuing",
+                "Order must be validated before issuing",
                 detail=f"Current status: {order.status}"
             )
 

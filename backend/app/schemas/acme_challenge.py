@@ -3,8 +3,8 @@ ACME Challenge Pydantic Schema
 """
 
 from datetime import datetime
-from typing import Optional
-from pydantic import BaseModel, Field
+
+from pydantic import BaseModel
 
 from app.models.acme_challenge import ChallengeStatus
 
@@ -18,19 +18,16 @@ class AcmeChallengeResponse(BaseModel):
     status: ChallengeStatus
 
     # HTTP-01
-    token: Optional[str] = None
-    key_authorization: Optional[str] = None
+    token: str | None = None
+    key_authorization: str | None = None
 
     # DNS-01
-    dns_txt_name: Optional[str] = None
-    dns_txt_value: Optional[str] = None
+    dns_txt_name: str | None = None
+    dns_txt_value: str | None = None
 
     # 时间戳
-    validated_at: Optional[datetime] = None
+    validated_at: datetime | None = None
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
     @property
     def is_http01(self) -> bool:
@@ -43,6 +40,7 @@ class AcmeChallengeResponse(BaseModel):
         return self.challenge_type == "dns-01"
 
     class Config:
+        from_attributes = True
         json_schema_extra = {
             "example": {
                 "id": 1,

@@ -18,7 +18,7 @@ Mock ACME 客户端
 
 import uuid
 from datetime import datetime, timedelta
-from typing import List, Dict, Any
+from typing import Any
 
 from app.acme.base import ACMEClientBase
 from app.acme.crypto import generate_dummy_certificate
@@ -36,7 +36,10 @@ class MockACMEClient(ACMEClientBase):
     TODO: 第二阶段实现真实 Let's Encrypt 客户端
     """
 
-    async def create_account(self, email: str) -> Dict[str, Any]:
+    def __init__(self) -> None:
+        self._orders: dict[str, list[str]] = {}
+
+    async def create_account(self, email: str) -> dict[str, Any]:
         """
         创建 Mock ACME 账户
 
@@ -58,7 +61,7 @@ class MockACMEClient(ACMEClientBase):
             "created_at": datetime.utcnow().isoformat(),
         }
 
-    async def create_order(self, domains: List[str]) -> Dict[str, Any]:
+    async def create_order(self, domains: list[str]) -> dict[str, Any]:
         """
         创建 Mock ACME 订单
 
@@ -66,6 +69,7 @@ class MockACMEClient(ACMEClientBase):
         """
         order_id = str(uuid.uuid4())
         order_url = f"mock://order/{order_id}"
+        self._orders[order_id] = domains
 
         logger.info(
             "Mock order created",
@@ -81,7 +85,7 @@ class MockACMEClient(ACMEClientBase):
             "expires_at": (datetime.utcnow() + timedelta(days=7)).isoformat(),
         }
 
-    async def get_challenges(self, order_url: str) -> List[Dict[str, Any]]:
+    async def get_challenges(self, order_url: str) -> list[dict[str, Any]]:
         """
         获取 Mock 挑战
 
@@ -90,8 +94,10 @@ class MockACMEClient(ACMEClientBase):
         # 从 order URL 提取 order_id
         order_id = order_url.split("/")[-1]
 
+        domains = self._orders.get(order_id, ["example.com"])
+
         challenges = []
-        for i, domain in enumerate(["example.com", "*.example.com"]):  # Mock domains
+        for i, domain in enumerate(domains):
             # HTTP-01 挑战
             http01_token = f"mock-token-{order_id[:8]}-{i}"
             http01_challenge = {
@@ -124,7 +130,7 @@ class MockACMEClient(ACMEClientBase):
 
         return challenges
 
-    async def validate_challenge(self, challenge_url: str) -> Dict[str, Any]:
+    async def validate_challenge(self, challenge_url: str) -> dict[str, Any]:
         """
         验证 Mock 挑战
 
@@ -149,7 +155,7 @@ class MockACMEClient(ACMEClientBase):
         self,
         order_url: str,
         csr: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         完成 Mock 订单
 
@@ -195,7 +201,7 @@ class MockACMEClient(ACMEClientBase):
 
         return cert_pem
 
-    async def check_order_status(self, order_url: str) -> Dict[str, Any]:
+    async def check_order_status(self, order_url: str) -> dict[str, Any]:
         """
         检查 Mock 订单状态
 
