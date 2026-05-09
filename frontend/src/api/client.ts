@@ -3,6 +3,7 @@
  */
 
 import axios from 'axios'
+import { authSession } from '../auth/session'
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
@@ -15,6 +16,10 @@ const apiClient = axios.create({
 // 请求拦截器
 apiClient.interceptors.request.use(
   (config) => {
+    const token = authSession.getToken()
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
     console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`)
     return config
   },

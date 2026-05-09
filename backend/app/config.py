@@ -29,6 +29,11 @@ class Settings(BaseSettings):
     # API 配置
     API_V1_STR: str = Field(default="/api/v1", description="API v1 路径前缀")
 
+    # 管理员认证配置（MVP）
+    ADMIN_USERNAME: str = Field(default="admin", description="管理员用户名")
+    ADMIN_PASSWORD: str = Field(default="admin", description="管理员密码")
+    ADMIN_API_TOKEN: str = Field(default="dev-admin-token", description="管理员 API Token")
+
     # 数据库配置
     DATABASE_URL: str = Field(
         default="sqlite+aiosqlite:///./data/1yuanssl.db",

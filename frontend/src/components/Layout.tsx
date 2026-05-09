@@ -3,13 +3,15 @@
  */
 
 import React from 'react'
-import { Layout, Menu, Typography } from 'antd'
+import { Button, Layout, Menu, Space, Typography } from 'antd'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
   DashboardOutlined,
+  LogoutOutlined,
   SafetyCertificateOutlined,
   SettingOutlined,
 } from '@ant-design/icons'
+import { authSession } from '../auth/session'
 
 const { Header, Sider, Content } = Layout
 const { Title } = Typography
@@ -22,6 +24,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const selectedKey = location.pathname.startsWith('/certificates') ? '/certificates' : location.pathname
+
+  const handleLogout = () => {
+    authSession.clearToken()
+    navigate('/login', { replace: true })
+  }
 
   const menuItems = [
     {
@@ -62,9 +69,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       </Sider>
       <Layout>
         <Header style={{ background: '#fff', padding: '0 24px' }}>
-          <Title level={3} style={{ margin: '16px 0' }}>
-            Let's Encrypt 证书管理
-          </Title>
+          <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+            <Title level={3} style={{ margin: '16px 0' }}>
+              Let's Encrypt 证书管理
+            </Title>
+            <Button icon={<LogoutOutlined />} onClick={handleLogout}>
+              退出
+            </Button>
+          </Space>
         </Header>
         <Content style={{ padding: '24px', background: '#f0f2f5', minHeight: '280px' }}>
           {children}

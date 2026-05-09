@@ -14,6 +14,12 @@ from app.main import app
 
 
 @pytest_asyncio.fixture
+async def auth_headers() -> dict[str, str]:
+    """Admin auth headers for protected API calls."""
+    return {"Authorization": "Bearer dev-admin-token"}
+
+
+@pytest_asyncio.fixture
 async def client(tmp_path) -> AsyncGenerator[AsyncClient, None]:
     """Create an API client backed by an isolated temporary SQLite database."""
     database_url = f"sqlite+aiosqlite:///{tmp_path}/test.db"
