@@ -166,6 +166,7 @@ Key variables:
 
 ## Development Guidance
 
+- Development workflow: create or confirm a GitHub issue first, switch to a dedicated development branch for that issue, commit the finished changes, open a pull request, and merge the pull request after checks/review. Do not develop directly on `main` for feature or fix work.
 - Read existing code before changing patterns. This repo is small and favors direct service classes over broad abstractions.
 - Keep changes scoped. Avoid unrelated rewrites or formatting churn.
 - If adding backend behavior, update route, schema, service, and model layers as needed.

@@ -83,6 +83,13 @@ make db-reset            # 重置（警告：删除所有数据）
 - 前端: TypeScript, ESLint + Prettier, React 18 + Ant Design
 - 包管理器: `uv`（后端，比 pip 快 10-100 倍）、`pnpm`（前端）
 
+## 开发流程
+
+- 开发前先创建或确认对应 GitHub issue。
+- 基于该 issue 切换到专门的开发分支，不直接在 `main` 上做功能或修复开发。
+- 完成改动后提交 commit。
+- 提交 Pull Request，等待检查/Review 后合并 PR。
+
 ## 关键文件
 
 - `backend/app/core/security.py`: encrypt_data/decrypt_data - AES-256-GCM 加密
