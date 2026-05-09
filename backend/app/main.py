@@ -41,17 +41,15 @@ async def lifespan(app: FastAPI):
     await init_db()
     print("✅ 数据库初始化完成")
 
-    # TODO: 启动后台任务调度器
-    # from app.tasks.scheduler import start_scheduler
-    # start_scheduler()
+    from app.tasks.scheduler import start_scheduler
+    start_scheduler()
 
     yield
 
     # 关闭时清理
     print("🛑 关闭服务...")
-    # TODO: 关闭调度器
-    # from app.tasks.scheduler import shutdown_scheduler
-    # shutdown_scheduler()
+    from app.tasks.scheduler import shutdown_scheduler
+    shutdown_scheduler()
 
 
 # 创建 FastAPI 应用

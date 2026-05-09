@@ -52,3 +52,25 @@ async def client(tmp_path) -> AsyncGenerator[AsyncClient, None]:
 
     app.dependency_overrides.clear()
     await engine.dispose()
+
+
+@pytest_asyncio.fixture
+async def db_session(tmp_path) -> AsyncGenerator[AsyncSession, None]:
+    """Create an isolated database session for service tests."""
+    database_url = f"sqlite+aiosqlite:///{tmp_path}/service-test.db"
+    engine = create_async_engine(database_url, poolclass=NullPool)
+    session_maker = async_sessionmaker(
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
+        autocommit=False,
+        autoflush=False,
+    )
+
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    async with session_maker() as session:
+        yield session
+
+    await engine.dispose()
