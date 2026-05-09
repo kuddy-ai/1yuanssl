@@ -3,12 +3,13 @@
  */
 
 import React, { useEffect, useState } from 'react'
-import { Card, Table, Button, Tag, Space, Typography, Popconfirm, message } from 'antd'
+import { Card, Table, Button, Tag, Space, Typography, Popconfirm, Select, message } from 'antd'
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { certificateApi } from '../api/certificates'
-import type { CertificateOrder, OrderStatus } from '../types/certificate'
+import { OrderStatus } from '../types/certificate'
+import type { CertificateOrder } from '../types/certificate'
 
 const { Title } = Typography
 
@@ -16,15 +17,16 @@ const CertificateList: React.FC = () => {
   const navigate = useNavigate()
   const [orders, setOrders] = useState<CertificateOrder[]>([])
   const [loading, setLoading] = useState(false)
+  const [statusFilter, setStatusFilter] = useState<OrderStatus | undefined>()
 
   useEffect(() => {
     loadOrders()
-  }, [])
+  }, [statusFilter])
 
   const loadOrders = async () => {
     setLoading(true)
     try {
-      const res = await certificateApi.list()
+      const res = await certificateApi.list(statusFilter ? { status: statusFilter } : undefined)
       if (res.success) {
         setOrders(res.data)
       }
@@ -58,6 +60,15 @@ const CertificateList: React.FC = () => {
     }
     return colors[status] || 'default'
   }
+
+  const statusOptions = [
+    { label: '待处理', value: OrderStatus.PENDING },
+    { label: '验证中', value: OrderStatus.VALIDATING },
+    { label: '已签发', value: OrderStatus.ISSUED },
+    { label: '失败', value: OrderStatus.FAILED },
+    { label: '已过期', value: OrderStatus.EXPIRED },
+    { label: '续期中', value: OrderStatus.RENEWING },
+  ]
 
   const columns = [
     {
@@ -133,6 +144,14 @@ const CertificateList: React.FC = () => {
         title={<Title level={4}>证书订单列表</Title>}
         extra={
           <Space>
+            <Select<OrderStatus>
+              allowClear
+              placeholder="按状态筛选"
+              value={statusFilter}
+              options={statusOptions}
+              onChange={setStatusFilter}
+              style={{ width: 140 }}
+            />
             <Button icon={<ReloadOutlined />} onClick={loadOrders}>刷新</Button>
             <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/certificates/create')}>
               新建订单
