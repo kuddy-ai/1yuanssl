@@ -1,0 +1,60 @@
+services:
+  # ==================== 后端服务 ====================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: 1yuanssl-backend
+    ports:
+      - "7000:7000"
+    volumes:
+      - ./backend/app:/app/app:ro  # 代码热重载（只读挂载）
+      - backend-data:/app/data  # 数据持久化
+    environment:
+      - APP_ENV=development
+      - DEBUG=true
+      - LOG_LEVEL=INFO
+      - DATABASE_URL=sqlite+aiosqlite:///./data/1yuanssl.db
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-change-me-in-production-use-strong-random-key}
+      - ACME_MODE=mock
+      - CORS_ORIGINS=http://localhost:7001,http://localhost:3000,http://localhost
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - 1yuanssl-network
+
+  # ==================== 前端服务 ====================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: 1yuanssl-frontend
+    ports:
+      - "7001:7001"
+    volumes:
+      - ./frontend/src:/app/src:ro  # 代码热重载
+      - ./frontend/public:/app/public:ro
+    environment:
+      - VITE_API_BASE_URL=http://localhost:7000/api/v1
+      - VITE_APP_TITLE=1yuanssl
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - 1yuanssl-network
+
+# ==================== 数据卷 ====================
+volumes:
+  backend-data:
+    name: 1yuanssl-backend-data
+    driver: local
+
+# ==================== 网络 ====================
+networks:
+  1yuanssl-network:
+    name: 1yuanssl-network
+    driver: bridge
