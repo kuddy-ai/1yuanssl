@@ -413,6 +413,7 @@ curl http://localhost:7000/api/v1/certificates/orders/1/download/fullchain
 - [API 文档](docs/api.md) - 详细的 API 说明
 - [部署指南](docs/deployment.md) - 生产环境部署
 - [安全说明](docs/security.md) - 安全设计细节
+- [生产部署说明](docs/production.md) - 公网演示/生产环境上线检查
 
 ## ⚠️ 注意事项
 
