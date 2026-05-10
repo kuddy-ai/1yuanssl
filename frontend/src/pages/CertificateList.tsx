@@ -2,7 +2,7 @@
  * 证书列表页面
  */
 
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Card, Table, Button, Tag, Space, Typography, Popconfirm, Select, message } from 'antd'
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
@@ -19,11 +19,7 @@ const CertificateList: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [statusFilter, setStatusFilter] = useState<OrderStatus | undefined>()
 
-  useEffect(() => {
-    loadOrders()
-  }, [statusFilter])
-
-  const loadOrders = async () => {
+  const loadOrders = useCallback(async () => {
     setLoading(true)
     try {
       const res = await certificateApi.list(statusFilter ? { status: statusFilter } : undefined)
@@ -35,7 +31,11 @@ const CertificateList: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [statusFilter])
+
+  useEffect(() => {
+    loadOrders()
+  }, [loadOrders])
 
   const handleDelete = async (orderId: number) => {
     try {
