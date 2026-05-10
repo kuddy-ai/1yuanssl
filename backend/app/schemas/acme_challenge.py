@@ -4,13 +4,33 @@ ACME Challenge Pydantic Schema
 
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from app.models.acme_challenge import ChallengeStatus
 
 
 class AcmeChallengeResponse(BaseModel):
     """ACME Challenge 响应"""
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
+            "example": {
+                "id": 1,
+                "order_id": 1,
+                "domain": "example.com",
+                "challenge_type": "http-01",
+                "status": "pending",
+                "token": "mock-token-123",
+                "key_authorization": "mock-token-123.thumbprint",
+                "dns_txt_name": None,
+                "dns_txt_value": None,
+                "validated_at": None,
+                "created_at": "2024-01-01T00:00:00",
+            }
+        },
+    )
+
     id: int
     order_id: int
     domain: str
@@ -38,21 +58,3 @@ class AcmeChallengeResponse(BaseModel):
     def is_dns01(self) -> bool:
         """是否为 DNS-01 验证"""
         return self.challenge_type == "dns-01"
-
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
-            "example": {
-                "id": 1,
-                "order_id": 1,
-                "domain": "example.com",
-                "challenge_type": "http-01",
-                "status": "pending",
-                "token": "mock-token-123",
-                "key_authorization": "mock-token-123.thumbprint",
-                "dns_txt_name": None,
-                "dns_txt_value": None,
-                "validated_at": None,
-                "created_at": "2024-01-01T00:00:00"
-            }
-        }
