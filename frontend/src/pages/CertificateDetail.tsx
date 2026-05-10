@@ -2,7 +2,7 @@
  * 证书订单详情页面
  */
 
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   Alert,
   Button,
@@ -49,7 +49,7 @@ const CertificateDetail: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!Number.isFinite(orderId)) {
       message.error('无效的订单 ID')
       navigate('/certificates')
@@ -74,11 +74,11 @@ const CertificateDetail: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [navigate, orderId])
 
   useEffect(() => {
     loadData()
-  }, [orderId])
+  }, [loadData])
 
   const runAction = async (action: 'validate' | 'issue') => {
     setActionLoading(action)
